@@ -78,6 +78,7 @@ const ProcessManager = () => {
             {processesData.length > 0 ?
             <Grid item xs={4}>
             <Card sx={{ maxWidth: 200 }}>
+              <CardHeader title="Add Process"></CardHeader>
                   <CardContent>
                     <Avatar
                       sx={{ m: 1, bgcolor: 'primary.main' }}

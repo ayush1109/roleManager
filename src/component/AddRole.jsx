@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Avatar from '@mui/material/Avatar'
 import Button from '@mui/material/Button'
 import CssBaseline from '@mui/material/CssBaseline'
@@ -17,33 +17,33 @@ import { SketchPicker } from 'react-color'
 import { v4 as uuidv4 } from 'uuid'
 import MultipleValueTextInput from 'react-multivalue-text-input'
 import { Chip, FormControl, Input } from '@mui/material'
-import { styled } from '@mui/system';
+import { styled } from '@mui/system'
 
 const theme = createTheme()
 
 const FormControlRoot = styled('div')({
-  display: "flex",
-  alignItems: "center",
-  gap: "40px",
-  width: "300px",
-  flexWrap: "wrap",
-  flexDirection: "row",
+  display: 'flex',
+  alignItems: 'center',
+  gap: '40px',
+  width: '300px',
+  flexWrap: 'wrap',
+  flexDirection: 'row',
   border: '0px solid lightgray',
   padding: 4,
   borderRadius: '4px',
   marginTop: '2vh',
-  "& .container": {
-    gap: "6px",
-    display: "flex",
-    flexDirection: "row",
-    flexWrap: "wrap",
+  '& .container': {
+    gap: '6px',
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap'
   },
-  "& .container span": {
-    backgroundColor: "white",
-    padding: "4px 6px",
-    borderRadius: "4px"
+  '& .container span': {
+    backgroundColor: 'white',
+    padding: '4px 6px',
+    borderRadius: '4px'
   }
-});
+})
 
 const AddRole = ({
   isEdit,
@@ -51,27 +51,58 @@ const AddRole = ({
   setCurrentRoleData,
   rolesData,
   setRolesData,
-  handleClose
+  handleClose,
+  selectedColor,
+  setSelectedColor
 }) => {
   let roleData = {}
   let form
 
-  console.log('---------', currentRoleData)
+  useEffect(() => {
+    console.log(currentRoleData)
+  }, [])
+
+  const updatedRolesData = rolesData.map(role => {
+    if (role.id === currentRoleData.id) {
+      return currentRoleData // Replace existing values
+    }
+    return role
+  })
+
   const handleSubmit = event => {
     form = event.currentTarget
     event.preventDefault()
     const data = new FormData(event.currentTarget)
-    roleData.name = data.get('rolename')
-    roleData.icon = data.get('icon')
-    roleData.order = rolesData.length;
-    roleData.responsibilities = responsibilityValues; 
-    roleData.color = selectedColor
-    roleData.id = uuidv4()
-    setRolesData([...rolesData, roleData])
+    if (isEdit) {
+      currentRoleData.name = data.get('rolename')
+      currentRoleData.icon = data.get('icon')
+      currentRoleData.order = rolesData.length
+      currentRoleData.responsibilities = responsibilityValues
+      currentRoleData.color = selectedColor
+
+      const index = rolesData.findIndex(role => role.id === currentRoleData.id)
+      if (index !== -1) rolesData[index] = currentRoleData
+      setRolesData(rolesData)
+    } else {
+      roleData.name = data.get('rolename')
+      roleData.icon = data.get('icon')
+      roleData.order = rolesData.length
+      roleData.responsibilities = responsibilityValues
+      roleData.color = selectedColor
+      roleData.id = uuidv4()
+      setRolesData([...rolesData, roleData])
+    }
+
     handleClose()
   }
 
-  const [selectedColor, setSelectedColor] = useState('#ffffff')
+  useEffect(() => {
+    if (isEdit) {
+      setSelectedColor(currentRoleData.color)
+      setResponsibilityValues(currentRoleData.responsibilities)
+    }
+  }, [])
+
   const [isOpen, setIsOpen] = useState(false)
 
   const handleColorChange = color => {
@@ -82,29 +113,28 @@ const AddRole = ({
     setIsOpen(!isOpen)
   }
 
-    const [responsibilityValues, setResponsibilityValues] = useState([]);
-    const [currResponsibilityValue, setCurrResponsibilityValue] = useState("");
+  const [responsibilityValues, setResponsibilityValues] = useState([])
+  const [currResponsibilityValue, setCurrResponsibilityValue] = useState('')
 
-    const handleKeyUp = (e) => {
-        console.log(e.keyCode);
-        if (e.keyCode == 9) {
-          if(e.target.value == '') return;
-            setResponsibilityValues((oldState) => [...oldState, e.target.value]);
-            setCurrResponsibilityValue("");
-        }
-    };
+  const handleKeyUp = e => {
+    console.log(e.keyCode)
+    if (e.keyCode == 9) {
+      if (e.target.value == '') return
+      setResponsibilityValues(oldState => [...oldState, e.target.value])
+      setCurrResponsibilityValue('')
+    }
+  }
 
-    const handleChange = (e) => {
-        setCurrResponsibilityValue(e.target.value);
-  };
-  
-  const handleDelete = ( item, index) =>{
+  const handleChange = e => {
+    setCurrResponsibilityValue(e.target.value)
+  }
+
+  const handleDelete = (item, index) => {
     let arr = [...responsibilityValues]
-    arr.splice(index,1)
+    arr.splice(index, 1)
     console.log(item)
     setResponsibilityValues(arr)
   }
-
 
   return (
     <>
@@ -123,7 +153,7 @@ const AddRole = ({
               <PersonAddAltIcon />
             </Avatar>
             <Typography component='h1' variant='h5'>
-              Add a Role
+              {isEdit ? 'Edit Role' : 'Add a Role'}
             </Typography>
             <Box component='form' onSubmit={handleSubmit} sx={{ mt: 3 }}>
               <Grid container spacing={2}>
@@ -146,13 +176,13 @@ const AddRole = ({
                     name='icon'
                     helperText='Select Icon.'
                     required
-                    defaultValue={isEdit ? currentRoleData.icon : ''}
+                    defaultValue={isEdit ? currentRoleData.icon : 'PersonIcon1'}
                     // value={'PersonIcon1'}
                   >
                     <MenuItem key={'PersonIcon1'} value={'PersonIcon1'}>
                       <AccountCircleIcon />
                     </MenuItem>
-                    <MenuItem key={'PersonIcon2'} value={'PersonIcon2'}>
+                    <MenuItem key={'PersonIcon2'} value={'Person2Icon'}>
                       <PersonIcon />
                     </MenuItem>
                     <MenuItem key={'PersonIcon3'} value={'PersonIcon3'}>
@@ -167,7 +197,11 @@ const AddRole = ({
                     onClick={togglePicker}
                     style={{ cursor: 'pointer', textAlign: 'center' }}
                   >
-                    <p>{isOpen ? "Click here to close color picker" : "Click to select color"}</p>
+                    <p>
+                      {isOpen
+                        ? 'Click here to close color picker'
+                        : 'Click to select color'}
+                    </p>
                     <div
                       style={{
                         width: '50px',
@@ -180,7 +214,8 @@ const AddRole = ({
                   {isOpen && (
                     <SketchPicker
                       color={selectedColor}
-                      onChangeComplete={handleColorChange}
+                      // onChangeComplete={handleColorChange}
+                      onChange={handleColorChange}
                       onClose={togglePicker} // Close the picker when it's closed
                     />
                   )}
@@ -188,26 +223,28 @@ const AddRole = ({
               </Grid>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                <FormControl >
-                <TextField
-                id='responsiblities'
-                helperText="Press TAB to add responsibility"
-                label="Responsibilities"
-                    value={currResponsibilityValue}
-                    variant="standard"
-                    onChange={handleChange}
-                    onKeyDown={handleKeyUp}
-                />
-                                  <FormControlRoot>
-                   <div className={"container"}>
-                    {responsibilityValues.map((item,index) => (
-                        <Chip  size="small" onDelete={()=>handleDelete(item,index)} label={item}/>
-                    ))}
-                </div>
-                </FormControlRoot>
-
-            </FormControl>
-              
+                  <FormControl>
+                    <TextField
+                      id='responsiblities'
+                      helperText='Press TAB to add responsibility'
+                      label='Responsibilities'
+                      value={currResponsibilityValue}
+                      variant='standard'
+                      onChange={handleChange}
+                      onKeyDown={handleKeyUp}
+                    />
+                    <FormControlRoot>
+                      <div className={'container'}>
+                        {responsibilityValues.map((item, index) => (
+                          <Chip
+                            size='small'
+                            onDelete={() => handleDelete(item, index)}
+                            label={item}
+                          />
+                        ))}
+                      </div>
+                    </FormControlRoot>
+                  </FormControl>
                 </Grid>
               </Grid>
               <Grid container spacing={2}>

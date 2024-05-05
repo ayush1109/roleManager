@@ -24,9 +24,20 @@ const RoleManager = () => {
   const [open, setOpen] = React.useState(false)
   const [isEdit, setIsEdit] = React.useState(false)
   const [currentRoleData, setCurrentRoleData] = useState({})
-  const handleOpen = () => setOpen(true)
+  const [selectedColor, setSelectedColor] = useState('#000000')
+
+  useEffect(() => {
+      console.log(currentRoleData);
+  }, [currentRoleData])
+
+  const handleOpen = () => {
+    setOpen(true)
+  }
+  
   const handleClose = () => {
     setOpen(false)
+    setIsEdit(false)
+    setSelectedColor('#000000')
   }
 
   const reorderList = (sourceIndex, destinationIndex) => {
@@ -64,7 +75,6 @@ const RoleManager = () => {
   }
   
   const ListElement = props => {
-    console.log(props.item.name);
     return (
     <Card sx={{ maxWidth: 200 }} style={{margin: '1vw'}}>
       {/* <CardHeader title="wedfwef"></CardHeader> */}
@@ -73,7 +83,8 @@ const RoleManager = () => {
           {props.item.name}
         </Typography>
         <Avatar sx={{ m: 1, bgcolor: props.item.color }}>
-          <Person2Icon />
+          {props.item.icon === "PersonIcon1" ? <AccountCircleIcon /> : props.item.icon === "Person2Icon" ? <PersonIcon /> : <Person2Icon />}
+          {/* <Person2Icon /> */}
         </Avatar>
       </CardContent>
       <CardContent>
@@ -94,7 +105,6 @@ const RoleManager = () => {
           size='small'
           onClick={() => {
             setCurrentRoleData(rolesData.filter(({ id }) => id === props.item.id)[0])
-            setRolesData(rolesData.filter(({ id }) => id !== props.item.id))
             setIsEdit(true)
             handleOpen()
           }}
@@ -112,8 +122,6 @@ const RoleManager = () => {
       </CardActions>
     </Card>
   )}
-
-  console.log(rolesData)
 
   return (
     <>
@@ -147,6 +155,8 @@ const RoleManager = () => {
               rolesData={rolesData}
               setRolesData={setRolesData}
               handleClose={handleClose}
+              selectedColor={selectedColor}
+              setSelectedColor={setSelectedColor}
             />
           </Box>
         </Fade>
